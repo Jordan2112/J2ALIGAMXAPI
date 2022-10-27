@@ -1,21 +1,20 @@
+
+import {AuthenticationComponent} from '@loopback/authentication';
+import {JWTAuthenticationComponent, MyUserService, RefreshTokenServiceBindings, TokenServiceBindings, UserServiceBindings} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
-import {
-  RestExplorerBindings,
-  RestExplorerComponent,
-} from '@loopback/rest-explorer';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
+import {
+  RestExplorerBindings,
+  RestExplorerComponent
+} from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import {MySequence} from './sequence';
-import {AuthenticationComponent} from '@loopback/authentication';
-import {
-  JWTAuthenticationComponent,
-  SECURITY_SCHEME_SPEC,
-  UserServiceBindings,
-} from '@loopback/authentication-jwt';
 import {J2AligamxDataSource} from './datasources';
+import {MailServiceBindings} from './key';
+import {MySequence} from './sequence';
+import {EmailService} from './services';
 
 export {ApplicationConfig};
 
@@ -52,6 +51,31 @@ export class J2ALigamxApplication extends BootMixin(
     this.component(JWTAuthenticationComponent);
     // Bind datasource
     this.dataSource(J2AligamxDataSource, UserServiceBindings.DATASOURCE_NAME);
+    this.dataSource(J2AligamxDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
+    //new
+
+    this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
+
+    //for jwt acces token
+
+    this.bind(TokenServiceBindings.TOKEN_SECRET).to("CLAVE SECRETA")
+
+    //for refresh token
+
+    this.bind(RefreshTokenServiceBindings.REFRESH_SECRET).to("CLAVE SECRETA")
+
+
+
+    //for jwt acces token
+
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("3600")
+
+    //
+
+    this.bind(RefreshTokenServiceBindings.REFRESH_REPOSITORY).to("216000")
+
+    this.bind(MailServiceBindings.MAILER_SERVICE).toClass(EmailService)
+      .to(new EmailService("alfonsoad098@gmail.com", "xkmzljtxwuszvfbq"));
 
   }
 }
