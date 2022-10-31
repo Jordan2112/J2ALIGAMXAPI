@@ -6,7 +6,7 @@ import {
 import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {model, property} from '@loopback/repository';
-// import {get, HttpErrors, param, post, requestBody, SchemaObject} from '@loopback/rest';
+
 import {get, HttpErrors, param, post, requestBody, SchemaObject} from '@loopback/rest';
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {genSalt, hash} from 'bcryptjs';
@@ -133,11 +133,13 @@ export class UserController {
     const token = await this.jwtService.generateToken(userProfile);
     //////////
 
+    await this.userRepository.updateById(user.id, {verificationToken: token});
+
     await this.EmailService.sendMail({
 
       to: newUserRequest.email,
-      text: "Correo Electronico",
-      html: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
+      text: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
+      // html: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
       subject: "correo de registro",
 
     });
