@@ -183,7 +183,6 @@ export class UserController {
   ): Promise<User | null> {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
-
     }
 
     var user = await this.userRepository.findOne({where: {verificationToken: token}})
@@ -192,7 +191,6 @@ export class UserController {
       return user;
     } else {
       throw new HttpErrors.BadRequest('token format not valid');
-
     }
   }
 
