@@ -141,9 +141,15 @@ export class UserController {
     await this.EmailService.sendMail({
 
       to: newUserRequest.email,
-      text: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
-      // html: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
-      subject: "correo de registro",
+      //text: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a>`,
+      html: `
+      <div>
+        <h2>J2A LIGA MX</h2>
+        <p>Para confirmar tu correo electrónico click en el siguiente botón:</p>
+        <a href="http://localhost:3000/users/confirmation/${token}" class:"btn btn-primary">click aqui para confirmar correo</a>
+      </div>
+      `,
+      subject: "Correo de registro",
 
     });
 

@@ -85,7 +85,7 @@ export class J2ALigamxApplication extends BootMixin(
     this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("216080")
 
     this.bind(MailServiceBindings.MAILER_SERVICE).toClass(EmailService)
-      .to(new EmailService("alfonsoad098@gmail.com", "xkmzljtxwuszvfbq"));
+      .to(new EmailService("j2aligamx@gmail.com", "sydfdaabdzhllkci"));
 
   }
 
