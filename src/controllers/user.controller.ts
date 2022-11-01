@@ -146,7 +146,7 @@ export class UserController {
       <div>
         <h2>J2A LIGA MX</h2>
         <p>Para confirmar tu correo electrónico click en el siguiente botón:</p>
-        <a href="http://localhost:3000/users/confirmation/${token}" class:"btn btn-primary">click aqui para confirmar correo</a>
+        <a href="https://j2aligamx.vercel.app/confirm/${token}" class:"btn btn-primary">click aqui para confirmar correo</a>
       </div>
       `,
       subject: "Correo de registro",
