@@ -8,6 +8,7 @@ import {inject} from '@loopback/core';
 import {model, property} from '@loopback/repository';
 
 import {get, HttpErrors, param, post, requestBody, SchemaObject} from '@loopback/rest';
+
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {genSalt, hash} from 'bcryptjs';
 import {MailServiceBindings} from '../key';
@@ -131,9 +132,11 @@ export class UserController {
     ////////
     const userProfile = this.userService.convertToUserProfile(user);
     const token = await this.jwtService.generateToken(userProfile);
-    //////////
+
+
 
     await this.userRepository.updateById(user.id, {verificationToken: token});
+    ///////////////////////
 
     await this.EmailService.sendMail({
 
@@ -146,6 +149,7 @@ export class UserController {
 
     return user;
   }
+
 
   ////
 
