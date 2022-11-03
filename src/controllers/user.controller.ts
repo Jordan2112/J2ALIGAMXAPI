@@ -21,13 +21,6 @@ type RefreshGrant = {
 
 };
 
-///////////////////////////////
-
-// type verificationGrant = {
-//   token: string;
-// };
-////////////////////////////
-
 // Describes the schema of grant object
 const RefreshGrantSchema: SchemaObject = {
   type: 'object',
@@ -129,29 +122,104 @@ export class UserController {
 
     await this.userRepository.userCredentials(user.id).create({password});
 
-    ////////
     const userProfile = this.userService.convertToUserProfile(user);
     const token = await this.jwtService.generateToken(userProfile);
 
-
-
     await this.userRepository.updateById(user.id, {verificationToken: token});
-    ///////////////////////
-
     await this.EmailService.sendMail({
 
       to: newUserRequest.email,
-      text: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
-      // html: `<a href="http://localhost:3000/users/confirmation/${token}">click aqui para confirmar correo</a`,
-      subject: "correo de registro",
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Document</title>
+          <style>
+
+              .header{
+                  background-color: #032e29;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: white;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+              .container{
+                  align-items: center;
+                  justify-content: center;
+                  font-family: sans-serif;
+                  text-align: center;
+              }
+      
+              .btnConfirmar{
+                  display: inline-block;
+                  border-radius: 4px;
+                  background-color: #7d2ed1;
+                  border: none;
+                  color: #FFFFFF;
+                  text-align: center;
+                  font-size: 25px;
+                  padding: 10px;
+                  width: 200px;
+                  transition: all 0.5s;
+                  cursor: pointer;
+                  margin: 5px;
+              }
+      
+              .btnConfirmar:hover{
+                  background-color: #63068f;
+              }
+      
+              .link{
+                  text-align: center;
+                  text-decoration:none;
+                  color: #FFFFFF;
+              }
+      
+              .footer{
+                  background-color: #eee6f2;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: #000000;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <div>
+                  <h1>J2A LIGA MX</h1>
+              </div>
+          </div>
+          <div class="container">
+              <p>Hola ${user.username}, esto te va encantar !!</p>
+              <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
+              <button class="btnConfirmar"><a class="link" href="https://j2aligamx.vercel.app/confirm?token=${token}">Confirmar</a></button>
+          </div>
+          <div class="footer">
+              <div>
+                  <p>© 2022 - J2A-LIGA MX.</p>
+              </div>
+          </div>
+      </body>
+      </html>
+      `,
+      subject: "Correo de registro",
 
     });
 
     return user;
   }
-
-
-  ////
 
   @get('/confirmation/{token}', {
     responses: {
@@ -178,7 +246,6 @@ export class UserController {
   ): Promise<User | null> {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
-
     }
 
     var user = await this.userRepository.findOne({where: {verificationToken: token}})
@@ -187,16 +254,10 @@ export class UserController {
       return user;
     } else {
       throw new HttpErrors.BadRequest('token format not valid');
-
     }
   }
 
-
-  /**
-   * A login function that returns an access token. After login, include the token
-   * in the next requests to verify your identity.
-   * @param credentials User email and password
-   */
+  /** * @param credentials */
   @post('/users/login', {
     responses: {
       '200': {
