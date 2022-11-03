@@ -1,75 +1,263 @@
 import {
-  Credentials,
-  MyUserService,
-  TokenServiceBindings,
-  User,
-  UserCredentials,
-  UserRepository,
-  UserServiceBindings,
-}from '@loopback/authentication-jwt'
+  authenticate,
+  TokenService,
+  UserService
+} from '@loopback/authentication';
+import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
-import {model, property, repository,Filter,FilterExcludingWhere} from '@loopback/repository'
-import {
-  post,
-  param,
-  get,
-  put,
-  del,
-  getModelSchemaRef,
-  requestBody,
-  response,
-  SchemaObject,
-} from '@loopback/rest';
-import {SecurityBindings, securityId, UserProfile} from '@loopback/security'
-import{genSalt, hash} from 'bcryptjs'
-import _ from 'lodash'
-import { TokenService } from '@loopback/authentication';
-import { authenticate } from '@loopback/authentication/dist/decorators';
+import {model, property} from '@loopback/repository';
 
-@model()
-export class NewUserRequest extends User{
-  @property({
-    type:'string',
-    required:true,
-  })
-  password: string
-}
+import {get, HttpErrors, param, post, requestBody, SchemaObject} from '@loopback/rest';
 
-const CredentialSchema: SchemaObject = {
+import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
+import {genSalt, hash} from 'bcryptjs';
+import {MailServiceBindings} from '../key';
+import {EmailService} from '../services';
+
+// Describes the type of grant object taken in by method "refresh"
+type RefreshGrant = {
+
+  refreshToken: string
+
+};
+
+// Describes the schema of grant object
+const RefreshGrantSchema: SchemaObject = {
   type: 'object',
-  required: ['email','password'],
+  required: ['refreshToken'],
+  properties: {
+    refreshToken: {
+      type: 'string',
+    },
+  },
+};
+
+// Describes the request body of grant object
+const RefreshGrantRequestBody = {
+  description: 'Reissuing Acess Token',
+  required: true,
+  content: {
+    'application/json': {schema: RefreshGrantSchema},
+  },
+};
+
+// Describe the schema of user credentials
+const CredentialsSchema: SchemaObject = {
+  type: 'object',
+  required: ['email', 'password'],
   properties: {
     email: {
-      type:'string',
-      format:'email',
+      type: 'string',
+      format: 'email',
     },
-    password:{
-      type:'string',
+    password: {
+      type: 'string',
       minLength: 8,
     },
   },
 };
 
+@model()
+export class NewUserRequest extends User {
+  @property({
+    type: 'string',
+    required: true,
+  })
+  password: string;
+}
+
 export const CredentialsRequestBody = {
-  description: 'Función de entrada de inicio de sesión',
+  description: 'The input of login function',
   required: true,
-  content:{
-    'application/json':{schema:CredentialSchema},
+  content: {
+    'application/json': {schema: CredentialsSchema},
   },
 };
 
 export class UserController {
   constructor(
+
+    @inject(MailServiceBindings.MAILER_SERVICE)
+    public EmailService: EmailService,
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
-    public userService: MyUserService,
-    @inject(SecurityBindings.USER,{optional:true})
-    public user:UserProfile,
-    @repository(UserRepository) protected userRepository:UserRepository,
-  ){}
+    public userService: UserService<User, Credentials>,
+    @inject(SecurityBindings.USER, {optional: true})
+    private user: UserProfile,
+    @inject(UserServiceBindings.USER_REPOSITORY)
+    public userRepository: UserRepository,
+    @inject(RefreshTokenServiceBindings.REFRESH_TOKEN_SERVICE)
+    public refreshService: RefreshTokenService,
+  ) { }
 
-  //Inicio de sesión para un usuario
+  @post('/users/signup', {
+    responses: {
+      '200': {
+        description: 'User model instance',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': User,
+            },
+          },
+        },
+      },
+    },
+  })
+  async signUp(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: CredentialsSchema,
+        },
+      },
+    })
+    newUserRequest: NewUserRequest,
+  ): Promise<User> {
+
+    const password = await hash(newUserRequest.password, await genSalt());
+    delete (newUserRequest as Partial<NewUserRequest>).password;
+    const user = await this.userRepository.create(newUserRequest);
+
+    await this.userRepository.userCredentials(user.id).create({password});
+
+    const userProfile = this.userService.convertToUserProfile(user);
+    const token = await this.jwtService.generateToken(userProfile);
+
+    await this.userRepository.updateById(user.id, {verificationToken: token});
+    await this.EmailService.sendMail({
+
+      to: newUserRequest.email,
+      html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Document</title>
+          <style>
+
+              .header{
+                  background-color: #032e29;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: white;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+              .container{
+                  align-items: center;
+                  justify-content: center;
+                  font-family: sans-serif;
+                  text-align: center;
+              }
+
+              .btnConfirmar{
+                  display: inline-block;
+                  border-radius: 4px;
+                  background-color: #7d2ed1;
+                  border: none;
+                  color: #FFFFFF;
+                  text-align: center;
+                  font-size: 25px;
+                  padding: 10px;
+                  width: 200px;
+                  transition: all 0.5s;
+                  cursor: pointer;
+                  margin: 5px;
+              }
+
+              .btnConfirmar:hover{
+                  background-color: #63068f;
+              }
+
+              .link{
+                  text-align: center;
+                  text-decoration:none;
+                  color: #FFFFFF;
+              }
+
+              .footer{
+                  background-color: #eee6f2;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: #000000;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <div>
+                  <h1>J2A LIGA MX</h1>
+              </div>
+          </div>
+          <div class="container">
+              <p>Hola ${user.username}, esto te va encantar !!</p>
+              <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
+              <a class="link" href="https://j2aligamx.vercel.app/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
+          </div>
+          <div class="footer">
+              <div>
+                  <p>© 2022 - J2A-LIGA MX.</p>
+              </div>
+          </div>
+      </body>
+      </html>
+      `,
+      subject: "Correo de registro",
+
+    });
+
+    return user;
+  }
+
+  @get('/confirmation/{token}', {
+    responses: {
+      '200': {
+        description: 'Verification Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  async confirmation(
+    @param.path.string('token') token: string,
+  ): Promise<User | null> {
+    if (!token) {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
+
+    var user = await this.userRepository.findOne({where: {verificationToken: token}})
+    if (user) {
+      await this.userRepository.updateById(user.id, {verificationToken: "", emailVerified: true})
+      return user;
+    } else {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
+  }
+
+  /** * @param credentials */
   @post('/users/login', {
     responses: {
       '200': {
@@ -94,11 +282,13 @@ export class UserController {
   ): Promise<{token: string}> {
     // ensure the user exists, and the password is correct
     const user = await this.userService.verifyCredentials(credentials);
+
     // convert a User object into a UserProfile object (reduced set of properties)
     const userProfile = this.userService.convertToUserProfile(user);
 
     // create a JSON Web Token based on the user profile
     const token = await this.jwtService.generateToken(userProfile);
+
     return {token};
   }
 
@@ -106,136 +296,83 @@ export class UserController {
   @get('/whoAmI', {
     responses: {
       '200': {
-        description: 'Return current user',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'string',
-            },
-          },
+        description: '',
+        schema: {
+          type: 'string',
         },
       },
     },
   })
-  async whoAmI(
-    @inject(SecurityBindings.USER)
-    currentUserProfile: UserProfile,
-  ): Promise<string> {
-    return currentUserProfile[securityId];
+  async whoAmI(): Promise<string> {
+    return this.user[securityId];
   }
-
-  //Registro para un usuario
-  @post('/signup', {
+  /**
+   * A login function that returns refresh token and access token.
+   * @param credentials User email and password
+   */
+  @post('/users/refresh-login', {
     responses: {
       '200': {
-        description: 'User',
+        description: 'Token',
         content: {
           'application/json': {
             schema: {
-              'x-ts-type': User,
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                refreshToken: {
+                  type: 'string',
+                },
+              },
             },
           },
         },
       },
     },
   })
-  async signUp(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(NewUserRequest, {
-            title: 'NewUser',
-          }),
-        },
-      },
-    })
-    newUserRequest: NewUserRequest,
-  ): Promise<User> {
-    const password = await hash(newUserRequest.password, await genSalt());
-    const savedUser = await this.userRepository.create(
-      _.omit(newUserRequest, 'password'),
+  async refreshLogin(
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+  ): Promise<TokenObject> {
+    // ensure the user exists, and the password is correct
+    const user = await this.userService.verifyCredentials(credentials);
+    // convert a User object into a UserProfile object (reduced set of properties)
+    const userProfile: UserProfile =
+      this.userService.convertToUserProfile(user);
+    const accessToken = await this.jwtService.generateToken(userProfile);
+    const tokens = await this.refreshService.generateToken(
+      userProfile,
+      accessToken,
     );
-
-    await this.userRepository.userCredentials(savedUser.id).create({password});
-
-    return savedUser;
+    return tokens;
   }
 
-  //Consulta masiva de usuarios
-  @authenticate('jwt')
-  @get('/users/userstable')
-  @response(200, {
-    description: 'Array of Usuarios model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(User, {includeRelations: true}),
+  @post('/refresh', {
+    responses: {
+      '200': {
+        description: 'Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
         },
       },
     },
   })
-  async find(
-    @param.filter(User) filter?: Filter<User>,
-  ): Promise<User[]> {
-    return this.userRepository.find(filter);
+  async refresh(
+    @requestBody(RefreshGrantRequestBody) refreshGrant: RefreshGrant,
+  ): Promise<TokenObject> {
+    return this.refreshService.refreshToken(refreshGrant.refreshToken);
   }
-
-  //Consultar usuarios mediante el Id
-  @authenticate('jwt')
-  @get('/users/{id}')
-  @response(200, {
-    description: 'Usuarios model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(User, {includeRelations: true}),
-      },
-    },
-  })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
-  ): Promise<User> {
-    return this.userRepository.findById(id, filter);
-  }
-
-  //Modificar usuario con el modelo users
-  @authenticate('jwt')
-  @put('/users/{id}')
-  @response(204, {
-    description: 'Usuarios PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() usuarios: User,
-  ): Promise<void> {
-    await this.userRepository.replaceById(id, usuarios);
-  }
-
-  //Eliminar usuarios mediante el Id
-  @authenticate('jwt')
-  @del('/users/{id}')
-  @response(204, {
-    description: 'Usuarios DELETE success',
-  })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.userRepository.deleteById(id);
-  }
-
-  // @authenticate('jwt')
-  // @put('/users/{id}')
-  // @response(204, {
-  //   description: 'Usuarios PUT success',
-  // })
-  // async replaceById(
-  //   @param.path.string('id') id: string,
-  //   @requestBody() usuariosCredentials: UserCredentials,
-  // ): Promise<void> {
-  //   await this.userRepository.replaceById(id, usuariosCredentials);
-  // }
-
 }
-
 
 
 
