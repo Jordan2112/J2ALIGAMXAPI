@@ -156,7 +156,7 @@ export class UserController {
                   font-family: sans-serif;
                   text-align: center;
               }
-      
+
               .btnConfirmar{
                   display: inline-block;
                   border-radius: 4px;
@@ -171,17 +171,17 @@ export class UserController {
                   cursor: pointer;
                   margin: 5px;
               }
-      
+
               .btnConfirmar:hover{
                   background-color: #63068f;
               }
-      
+
               .link{
                   text-align: center;
                   text-decoration:none;
                   color: #FFFFFF;
               }
-      
+
               .footer{
                   background-color: #eee6f2;
                   align-items: center;
@@ -204,7 +204,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}, esto te va encantar !!</p>
               <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
-              <button class="btnConfirmar"><a class="link" href="https://j2aligamx.vercel.app/confirm?token=${token}">Confirmar</a></button>
+              <a class="link" href="https://j2aligamx.vercel.app/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
