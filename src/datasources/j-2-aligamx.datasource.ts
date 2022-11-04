@@ -5,11 +5,11 @@ const config = {
   name: 'j2aligamx',
   connector: 'mysql',
   url: '',
-  host: 'j2a-ligamx.ckhncaasy0ia.us-east-1.rds.amazonaws.com',
+  host: 'j2aligamx.cfpkkpkgf0dq.us-east-1.rds.amazonaws.com',
 
-  port: 3306,
+  port: 3308,
   user: 'admin',
-  password: 'PonchoAndrade1290',
+  password: 'aacj2a-lmx',
   database: 'j2aligamx',
   insecureAuth: true
 };
