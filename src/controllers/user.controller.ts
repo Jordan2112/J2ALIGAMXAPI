@@ -204,7 +204,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}, esto te va encantar !!</p>
               <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
-              <a class="link" href="https://j2aligamx.vercel.app/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="http://localhost:3000/session/confirmation/${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
@@ -219,6 +219,168 @@ export class UserController {
     });
 
     return user;
+  }
+
+  @get('/user/{email}', {
+    responses: {
+      '200': {
+        description: 'email exist',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  async findByEmail(
+    @param.path.string('email') email: string,
+  ): Promise<User | null> {
+    if (!email) {
+      throw new HttpErrors.BadRequest('email format not valid');
+    }
+    var user = await this.userRepository.findOne({where: {email: email}})
+    if (user) {
+      const userProfile = this.userService.convertToUserProfile(user);
+      const token = await this.jwtService.generateToken(userProfile);
+      await this.EmailService.sendMail({
+        to: user.email,
+        html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Document</title>
+          <style>
+
+              .header{
+                  background-color: #032e29;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: white;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+              .container{
+                  align-items: center;
+                  justify-content: center;
+                  font-family: sans-serif;
+                  text-align: center;
+              }
+
+              .btnConfirmar{
+                  display: inline-block;
+                  border-radius: 4px;
+                  background-color: #7d2ed1;
+                  border: none;
+                  color: #FFFFFF;
+                  text-align: center;
+                  font-size: 25px;
+                  padding: 10px;
+                  width: 200px;
+                  transition: all 0.5s;
+                  cursor: pointer;
+                  margin: 5px;
+              }
+
+              .btnConfirmar:hover{
+                  background-color: #63068f;
+              }
+
+              .link{
+                  text-align: center;
+                  text-decoration:none;
+                  color: #FFFFFF;
+              }
+
+              .footer{
+                  background-color: #eee6f2;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  color: #000000;
+                  font-family: sans-serif;
+                  margin-top: 20px;
+                  padding: 10px;
+                  margin-bottom: 20px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <div>
+                  <h1>J2A LIGA MX</h1>
+              </div>
+          </div>
+          <div class="container">
+              <p>Hola ${user.username}</p>
+              <p>Para recuperar tu contraseña porfavor da click aqui:</p>
+              <a class="link" href="https://j2aligamx.vercel.app/${token}"><button class="btnConfirmar">Confirmar</button></a>
+          </div>
+          <div class="footer">
+              <div>
+                  <p>© 2022 - J2A-LIGA MX.</p>
+              </div>
+          </div>
+      </body>
+      </html>
+      `,
+        subject: "Correo de registro",
+      })
+      return user;
+    } else {
+      throw new HttpErrors.BadRequest('email format not valid');
+    }
+  }
+
+  @get('/changePass/{token}', {
+    responses: {
+      '200': {
+        description: 'Verification Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  )
+
+  async changepass(
+    @param.path.string('token') token: string,
+  ): Promise<User | null> {
+    if (!token) {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
+    var user = await this.userRepository.findOne({where: {verificationToken: token}})
+    var id = user?.id
+    //var credential = await this.newUserRequest.findOne({where: {userId: id}})
+    if (user) {
+      await this.userRepository.updateById(user.id, {, password: true})
+      return user;
+    } else {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
   }
 
   @get('/confirmation/{token}', {
@@ -247,7 +409,6 @@ export class UserController {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
     }
-
     var user = await this.userRepository.findOne({where: {verificationToken: token}})
     if (user) {
       await this.userRepository.updateById(user.id, {verificationToken: "", emailVerified: true})
