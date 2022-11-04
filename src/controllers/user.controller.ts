@@ -204,7 +204,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}, esto te va encantar !!</p>
               <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
-              <a class="link" href="http://localhost:3000/session/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="https://j2aligamx.vercel.app/session/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
