@@ -204,7 +204,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}, esto te va encantar !!</p>
               <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
-              <a class="link" href="http://localhost:3000/session/confirmation/${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="http://localhost:3000/session/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
@@ -327,7 +327,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}</p>
               <p>Para recuperar tu contraseña porfavor da click aqui:</p>
-              <a class="link" href="https://j2aligamx.vercel.app/${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="https://j2aligamx.vercel.app/session/newPassword?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
@@ -345,43 +345,43 @@ export class UserController {
     }
   }
 
-  @get('/changePass/{token}', {
-    responses: {
-      '200': {
-        description: 'Verification Token',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                accessToken: {
-                  type: 'object',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  }
-  )
+  // @get('/changePass/{token}', {
+  //   responses: {
+  //     '200': {
+  //       description: 'Verification Token',
+  //       content: {
+  //         'application/json': {
+  //           schema: {
+  //             type: 'object',
+  //             properties: {
+  //               accessToken: {
+  //                 type: 'object',
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   },
+  // }
+  // )
 
-  async changepass(
-    @param.path.string('token') token: string,
-  ): Promise<User | null> {
-    if (!token) {
-      throw new HttpErrors.BadRequest('token format not valid');
-    }
-    var user = await this.userRepository.findOne({where: {verificationToken: token}})
-    var id = user?.id
-    //var credential = await this.newUserRequest.findOne({where: {userId: id}})
-    if (user) {
-      await this.userRepository.updateById(user.id, {, password: true})
-      return user;
-    } else {
-      throw new HttpErrors.BadRequest('token format not valid');
-    }
-  }
+  // async changepass(
+  //   @param.path.string('token') token: string,
+  // ): Promise<User | null> {
+  //   if (!token) {
+  //     throw new HttpErrors.BadRequest('token format not valid');
+  //   }
+  //   var user = await this.userRepository.findOne({where: {verificationToken: token}})
+  //   var id = user?.id
+  //   //var credential = await this.newUserRequest.findOne({where: {userId: id}})
+  //   if (user) {
+  //     await this.userRepository.updateById(user.id, {, password: true})
+  //     return user;
+  //   } else {
+  //     throw new HttpErrors.BadRequest('token format not valid');
+  //   }
+  // }
 
   @get('/confirmation/{token}', {
     responses: {
