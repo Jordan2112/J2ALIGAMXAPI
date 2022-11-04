@@ -18,7 +18,7 @@ const config = {
   name: 'j2aligamx',
   connector: 'mysql',
   url: '',
-  host: 'j2aligamx.cfpkkpkgf0dq.us-east-1.rds.amazonaws.com',
+  host: 'j2ligamx.cbr2yblgiwp6.us-east-2.rds.amazonaws.com',
 
   port: 3308,
   user: 'admin',
