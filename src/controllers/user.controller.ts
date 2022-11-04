@@ -3,7 +3,7 @@ import {
   TokenService,
   UserService
 } from '@loopback/authentication';
-import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserCredentials, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
+import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {model, property} from '@loopback/repository';
 
@@ -363,19 +363,18 @@ export class UserController {
         },
       },
     },
-  },
+  }
   )
 
   async changepass(
-    newUserRequest: NewUserRequest,
     @param.path.string('token') token: string,
-  ): Promise<UserCredentials | null> {
+  ): Promise<User | null> {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
     }
     var user = await this.userRepository.findOne({where: {verificationToken: token}})
     var id = user?.id
-    var credential = await this.userCredential.findOne({where: {userId: user?.id}})
+    //var credential = await this.newUserRequest.findOne({where: {userId: id}})
     if (user) {
       await this.userRepository.updateById(user.id, {, password: true})
       return user;
