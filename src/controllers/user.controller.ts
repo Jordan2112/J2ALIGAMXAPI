@@ -3,7 +3,7 @@ import {
   TokenService,
   UserService
 } from '@loopback/authentication';
-import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
+import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserCredentialsRepository, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {model, property} from '@loopback/repository';
 
@@ -66,6 +66,21 @@ export class NewUserRequest extends User {
   password: string;
 }
 
+@model()
+export class NewUserRequestPassword {
+  @property({
+    type: 'string',
+    required: true,
+  })
+  password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  token: string;
+}
+
 export const CredentialsRequestBody = {
   description: 'The input of login function',
   required: true,
@@ -83,6 +98,8 @@ export class UserController {
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
     public userService: UserService<User, Credentials>,
+    @inject(UserServiceBindings.USER_CREDENTIALS_REPOSITORY)
+    public userCredentials: UserCredentialsRepository,
     @inject(SecurityBindings.USER, {optional: true})
     private user: UserProfile,
     @inject(UserServiceBindings.USER_REPOSITORY)
@@ -250,6 +267,7 @@ export class UserController {
     if (user) {
       const userProfile = this.userService.convertToUserProfile(user);
       const token = await this.jwtService.generateToken(userProfile);
+      await this.userRepository.updateById(user.id, {verificationToken: token});
       await this.EmailService.sendMail({
         to: user.email,
         html: `
@@ -345,7 +363,7 @@ export class UserController {
     }
   }
 
-  @get('/changePass/{token}', {
+  @post('/changePass', {
     responses: {
       '200': {
         description: 'Verification Token',
@@ -364,19 +382,25 @@ export class UserController {
       },
     },
   }
+
   )
 
   async changepass(
     @param.path.string('token') token: string,
+    newUserRequestPassword: NewUserRequestPassword
   ): Promise<User | null> {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
     }
+    const password = await hash(newUserRequestPassword.password, await genSalt());
     var user = await this.userRepository.findOne({where: {verificationToken: token}})
-    var id = user?.id
-    //var credential = await this.newUserRequest.findOne({where: {userId: id}})
     if (user) {
-      await this.userRepository.updateById(user.id, {, password: true})
+      var credential = await this.userCredentials.findOne({where: {userId: user.id}})
+      if (credential) {
+        await this.userCredentials.updateById(credential.id, {password: password})
+      } else {
+        throw new HttpErrors.BadRequest('token format not valid');
+      }
       return user;
     } else {
       throw new HttpErrors.BadRequest('token format not valid');
