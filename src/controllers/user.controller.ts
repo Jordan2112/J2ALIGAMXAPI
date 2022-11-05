@@ -363,7 +363,7 @@ export class UserController {
     }
   }
 
-  @post('/changePass', {
+  @post('/changePass/{token}', {
     responses: {
       '200': {
         description: 'Verification Token',
@@ -382,9 +382,7 @@ export class UserController {
       },
     },
   }
-
   )
-
   async changepass(
     @param.path.string('token') token: string,
     newUserRequestPassword: NewUserRequestPassword
