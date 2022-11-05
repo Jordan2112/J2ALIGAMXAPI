@@ -57,6 +57,17 @@ const CredentialsSchema: SchemaObject = {
   },
 };
 
+const PasswordSchema: SchemaObject = {
+  type: 'object',
+  required: ['password'],
+  properties: {
+    password: {
+      type: 'string',
+      minLength: 8,
+    },
+  },
+};
+
 @model()
 export class NewUserRequest extends User {
   @property({
@@ -362,6 +373,7 @@ export class UserController {
       throw new HttpErrors.BadRequest('email format not valid');
     }
   }
+
   @post('/changePass/{token}', {
     responses: {
       '200': {
@@ -380,11 +392,17 @@ export class UserController {
         },
       },
     },
-  }
-  )
+  })
   async changepass(
     @param.path.string('token') token: string,
-    newUserRequestPassword: NewUserRequestPassword
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: PasswordSchema,
+        },
+      },
+    })
+    newUserRequestPassword: NewUserRequestPassword,
   ): Promise<User | null> {
     if (!token) {
       throw new HttpErrors.BadRequest('token format not valid');
@@ -398,13 +416,14 @@ export class UserController {
       } else {
         throw new HttpErrors.BadRequest('token format not valid');
       }
+      console.log(user.email)
       return user;
     } else {
       throw new HttpErrors.BadRequest('token format not valid');
     }
   }
 
-  @get('/confirmation/{token}', {
+  @post('/confirmation/{token}', {
     responses: {
       '200': {
         description: 'Verification Token',
