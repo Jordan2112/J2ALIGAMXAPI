@@ -30,7 +30,6 @@ const config = {
   connector: 'mysql',
   url: '',
   host: 'j2ligamx.cbr2yblgiwp6.us-east-2.rds.amazonaws.com',
-
   port: 3308,
   user: 'admin',
   password: 'aacj2a-lmx',

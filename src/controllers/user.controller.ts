@@ -221,7 +221,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}, esto te va encantar !!</p>
               <p>Para confirmar tu correo electrónico haz click en el siguiente botón:</p>
-              <a class="link" href="http://localhost:3000/session/confirmation/${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="https://j2aligamx.vercel.app/session/confirm?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
@@ -345,7 +345,7 @@ export class UserController {
           <div class="container">
               <p>Hola ${user.username}</p>
               <p>Para recuperar tu contraseña porfavor da click aqui:</p>
-              <a class="link" href="https://j2aligamx.vercel.app/${token}"><button class="btnConfirmar">Confirmar</button></a>
+              <a class="link" href="https://j2aligamx.vercel.app/session/newPassword?token=${token}"><button class="btnConfirmar">Confirmar</button></a>
           </div>
           <div class="footer">
               <div>
@@ -362,7 +362,6 @@ export class UserController {
       throw new HttpErrors.BadRequest('email format not valid');
     }
   }
-
   @post('/changePass/{token}', {
     responses: {
       '200': {
