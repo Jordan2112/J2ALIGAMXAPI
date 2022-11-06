@@ -13,12 +13,23 @@ import {juggler} from '@loopback/repository';
 //   insecureAuth: true
 // };
 
+/*const config = {
+  name: 'j2aligamx',
+  connector: 'mysql',
+  url: '',
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: '1234',
+  database: 'ligamx',
+  insecureAuth: true
+};*/
+
 const config = {
   name: 'j2aligamx',
   connector: 'mysql',
   url: '',
   host: 'j2ligamx.cbr2yblgiwp6.us-east-2.rds.amazonaws.com',
-
   port: 3308,
   user: 'admin',
   password: 'aacj2a-lmx',
