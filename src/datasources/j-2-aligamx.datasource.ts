@@ -6,10 +6,10 @@ import {juggler} from '@loopback/repository';
 //   connector: 'mysql',
 //   url: '',
 //   host: 'localhost',
-//   port: 3306,
+//   port: 3308,
 //   user: 'root',
 //   password: 'Jordan',
-//   database: 'j2aligamx',
+//   database: 'j2saligamx',
 //   insecureAuth: true
 // };
 
