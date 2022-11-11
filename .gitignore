@@ -4,7 +4,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+datasources/j-2-aligamx.datasource.ts
 # Runtime data
 pids
 *.pid
@@ -67,3 +67,5 @@ typings/
 
 
 node_modules
+.gitignore
+src/datasources/j-2-aligamx.datasource.ts

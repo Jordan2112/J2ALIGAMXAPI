@@ -3,7 +3,7 @@ import {
   TokenService,
   UserService
 } from '@loopback/authentication';
-import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
+import {Credentials, RefreshTokenService, RefreshTokenServiceBindings, TokenObject, TokenServiceBindings, User, UserCredentialsRepository, UserRepository, UserServiceBindings} from '@loopback/authentication-jwt';
 import {inject} from '@loopback/core';
 import {model, property} from '@loopback/repository';
 
@@ -57,6 +57,17 @@ const CredentialsSchema: SchemaObject = {
   },
 };
 
+const PasswordSchema: SchemaObject = {
+  type: 'object',
+  required: ['password'],
+  properties: {
+    password: {
+      type: 'string',
+      minLength: 8,
+    },
+  },
+};
+
 @model()
 export class NewUserRequest extends User {
   @property({
@@ -64,6 +75,21 @@ export class NewUserRequest extends User {
     required: true,
   })
   password: string;
+}
+
+@model()
+export class NewUserRequestPassword {
+  @property({
+    type: 'string',
+    required: true,
+  })
+  password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  token: string;
 }
 
 export const CredentialsRequestBody = {
@@ -83,6 +109,8 @@ export class UserController {
     public jwtService: TokenService,
     @inject(UserServiceBindings.USER_SERVICE)
     public userService: UserService<User, Credentials>,
+    @inject(UserServiceBindings.USER_CREDENTIALS_REPOSITORY)
+    public userCredentials: UserCredentialsRepository,
     @inject(SecurityBindings.USER, {optional: true})
     private user: UserProfile,
     @inject(UserServiceBindings.USER_REPOSITORY)
@@ -250,6 +278,7 @@ export class UserController {
     if (user) {
       const userProfile = this.userService.convertToUserProfile(user);
       const token = await this.jwtService.generateToken(userProfile);
+      await this.userRepository.updateById(user.id, {verificationToken: token});
       await this.EmailService.sendMail({
         to: user.email,
         html: `
@@ -345,7 +374,60 @@ export class UserController {
     }
   }
 
+<<<<<<< HEAD
   @get('/confirmation/{token}', {
+=======
+  @post('/changePass/{token}', {
+    responses: {
+      '200': {
+        description: 'Verification Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  async changepass(
+    @param.path.string('token') token: string,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: PasswordSchema,
+        },
+      },
+    })
+    newUserRequestPassword: NewUserRequestPassword,
+  ): Promise<User | null> {
+    if (!token) {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
+    const password = await hash(newUserRequestPassword.password, await genSalt());
+    var user = await this.userRepository.findOne({where: {verificationToken: token}})
+    if (user) {
+      var credential = await this.userCredentials.findOne({where: {userId: user.id}})
+      if (credential) {
+        await this.userCredentials.updateById(credential.id, {password: password})
+      } else {
+        throw new HttpErrors.BadRequest('token format not valid');
+      }
+      console.log(user.email)
+      return user;
+    } else {
+      throw new HttpErrors.BadRequest('token format not valid');
+    }
+  }
+
+  @post('/confirmation/{token}', {
+>>>>>>> 15a2fc1d29c45ef954f7456e15119258926e3794
     responses: {
       '200': {
         description: 'Verification Token',
