@@ -345,44 +345,6 @@ export class UserController {
     }
   }
 
-  // @get('/changePass/{token}', {
-  //   responses: {
-  //     '200': {
-  //       description: 'Verification Token',
-  //       content: {
-  //         'application/json': {
-  //           schema: {
-  //             type: 'object',
-  //             properties: {
-  //               accessToken: {
-  //                 type: 'object',
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // }
-  // )
-
-  // async changepass(
-  //   @param.path.string('token') token: string,
-  // ): Promise<User | null> {
-  //   if (!token) {
-  //     throw new HttpErrors.BadRequest('token format not valid');
-  //   }
-  //   var user = await this.userRepository.findOne({where: {verificationToken: token}})
-  //   var id = user?.id
-  //   //var credential = await this.newUserRequest.findOne({where: {userId: id}})
-  //   if (user) {
-  //     await this.userRepository.updateById(user.id, {, password: true})
-  //     return user;
-  //   } else {
-  //     throw new HttpErrors.BadRequest('token format not valid');
-  //   }
-  // }
-
   @get('/confirmation/{token}', {
     responses: {
       '200': {
