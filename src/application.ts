@@ -23,6 +23,14 @@ import {MailServiceBindings} from './key';
 import {MySequence} from './sequence';
 import {EmailService} from './services';
 
+//Configuracion Variables de Control (INCOMPLETA)
+require('dotenv').config()
+const db_host = process.env.DB_HOST || 'localhost';
+const db_port = process.env.DB_PORT || 3306;
+const db_user = process.env.DB_USER || 'root'
+const db_pass = process.env.DB_PASSWORD || '1234'
+const database = process.env.DB_DATABASE || 'ligamx'
+
 export {ApplicationConfig};
 
 export class J2ALigamxApplication extends BootMixin(
@@ -62,8 +70,17 @@ export class J2ALigamxApplication extends BootMixin(
     // Bind datasource
     this.dataSource(J2AligamxDataSource, UserServiceBindings.DATASOURCE_NAME);
     this.dataSource(J2AligamxDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
-    //new
-
+    //Bind de Variables de Control
+    this.bind('datasources.config.mysql').to({
+      "name": "j2aligamx",
+      "connector": "mysql",
+      "url": "",
+      "host": db_host,
+      "port": db_port,
+      "user": db_user,
+      "password": db_pass,
+      "database": database
+    })
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
 
     //for jwt acces token
