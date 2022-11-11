@@ -374,9 +374,6 @@ export class UserController {
     }
   }
 
-<<<<<<< HEAD
-  @get('/confirmation/{token}', {
-=======
   @post('/changePass/{token}', {
     responses: {
       '200': {
@@ -427,7 +424,6 @@ export class UserController {
   }
 
   @post('/confirmation/{token}', {
->>>>>>> 15a2fc1d29c45ef954f7456e15119258926e3794
     responses: {
       '200': {
         description: 'Verification Token',
