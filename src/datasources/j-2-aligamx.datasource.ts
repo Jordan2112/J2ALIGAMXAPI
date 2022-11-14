@@ -25,7 +25,7 @@ import {juggler} from '@loopback/repository';
   insecureAuth: true
 };*/
 
-const config = {
+/*const config = {
   name: 'j2aligamx',
   connector: 'mysql',
   url: '',
@@ -35,7 +35,7 @@ const config = {
   password: 'aacj2a-lmx',
   database: 'j2aligamx',
   insecureAuth: true
-};
+};*/
 
 // Observe application's life cycle to disconnect the datasource when
 // application is stopped. This allows the application to be shut down
@@ -45,12 +45,10 @@ const config = {
 export class J2AligamxDataSource extends juggler.DataSource
   implements LifeCycleObserver {
   static dataSourceName = 'j2aligamx';
-  static readonly defaultConfig = config;
+  //static readonly defaultConfig = config;
 
   constructor(
-    @inject('datasources.config.j2aligamx', {optional: true})
-    dsConfig: object = config,
-  ) {
+    @inject('datasources.config.j2aligamx', {optional: true}) dsConfig: object) {
     super(dsConfig);
   }
 }

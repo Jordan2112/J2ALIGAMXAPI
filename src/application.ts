@@ -27,9 +27,9 @@ import {EmailService} from './services';
 require('dotenv').config()
 const db_host = process.env.DB_HOST || 'localhost';
 const db_port = process.env.DB_PORT || 3306;
-const db_user = process.env.DB_USER || 'root'
-const db_pass = process.env.DB_PASSWORD || '1234'
-const database = process.env.DB_DATABASE || 'ligamx'
+const db_user = process.env.DB_USER || 'root';
+const db_pass = process.env.DB_PASSWORD || '1234';
+const database = process.env.DB_DATABASE || 'ligamx';
 
 export {ApplicationConfig};
 
@@ -42,6 +42,7 @@ export class J2ALigamxApplication extends BootMixin(
     // Set up the custom sequence
     this.sequence(MySequence);
 
+    console.log("PASSWORD: " + db_pass);
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));
 
@@ -71,7 +72,7 @@ export class J2ALigamxApplication extends BootMixin(
     this.dataSource(J2AligamxDataSource, UserServiceBindings.DATASOURCE_NAME);
     this.dataSource(J2AligamxDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
     //Bind de Variables de Control
-    this.bind('datasources.config.mysql').to({
+    this.bind('datasources.config.j2aligamx').to({
       "name": "j2aligamx",
       "connector": "mysql",
       "url": "",
@@ -80,7 +81,8 @@ export class J2ALigamxApplication extends BootMixin(
       "user": db_user,
       "password": db_pass,
       "database": database
-    })
+    });
+
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
 
     //for jwt acces token
@@ -106,27 +108,4 @@ export class J2ALigamxApplication extends BootMixin(
 
   }
 
-  // private setupLogging() {
-  //   // Register `morgan` express middleware
-  //   // Create a middleware factory wrapper for `morgan(format, options)`
-  //   const morganFactory = (config?: morgan.Options<Request, Response>) => {
-  //     this.debug('Morgan configuration', config);
-  //     return morgan('combined', config);
-  //   };
-
-  //   // Print out logs using `debug`
-  //   const defaultConfig: morgan.Options<Request, Response> = {
-  //     stream: {
-  //       write: str => {
-  //         this._debug(str);
-  //       },
-  //     },
-  //   };
-  //   this.expressMiddleware(morganFactory, defaultConfig, {
-  //     injectConfiguration: 'watch',
-  //     key: 'middleware.morgan',
-  //   });
 }
-
-
-// }
