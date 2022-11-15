@@ -1,17 +1,17 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
 
-const config = {
-  name: 'j2aligamx',
-  connector: 'mysql',
-  url: '',
-  host: 'localhost',
-  port: 3308,
-  user: 'root',
-  password: 'Jordan',
-  database: 'j2saligamx',
-  insecureAuth: true
-};
+// const config = {
+//   name: 'j2aligamx',
+//   connector: 'mysql',
+//   url: '',
+//   host: 'localhost',
+//   port: 3308,
+//   user: 'root',
+//   password: 'Jordan',
+//   database: 'j2saligamx',
+//   insecureAuth: true
+// };
 
 /*const config = {
   name: 'j2aligamx',
