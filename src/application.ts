@@ -97,11 +97,11 @@ export class J2ALigamxApplication extends BootMixin(
 
     //for jwt acces token
 
-    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("172800000")
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("120")
 
 
-    //216080
-    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("172800000")
+    //452800
+    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("120")
 
     this.bind(MailServiceBindings.MAILER_SERVICE).toClass(EmailService)
       .to(new EmailService("j2aligamx@gmail.com", "sydfdaabdzhllkci"));
