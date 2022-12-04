@@ -1,5 +1,4 @@
-import {belongsTo, Entity, Model, model, property} from '@loopback/repository';
-import { Usuarios } from './usuarios.model';
+import {Entity, model, property} from '@loopback/repository';
 
 @model({settings: {strict: false}})
 export class PreferenciasUsuario extends Entity {
@@ -14,21 +13,23 @@ export class PreferenciasUsuario extends Entity {
     type: 'string',
     required: true,
   })
-  EquipoFavorito: string;
+  idEquipoFavorito: string;
 
   @property({
     type: 'string',
   })
-  Lenguaje?: string;
+  NombreEquipo?: string;
 
   @property({
     type: 'string',
   })
-  Fondo?: string;
+  LogoEquipo?: string;
 
-  @belongsTo(()=>Usuarios)
-  usuarios : string;
-  
+  @property({
+    type:'string'
+  })
+  idUser?: string;
+
   // Define well-known properties here
 
   // Indexer property to allow additional data

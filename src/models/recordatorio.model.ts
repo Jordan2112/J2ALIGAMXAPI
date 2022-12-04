@@ -1,5 +1,5 @@
-import {belongsTo, Entity, Model, model, property} from '@loopback/repository';
-import { Usuarios } from './usuarios.model';
+import {User} from '@loopback/authentication-jwt';
+import {belongsTo, Entity, model, property} from '@loopback/repository';
 
 @model({settings: {strict: false}})
 export class Recordatorio extends Entity {
@@ -34,8 +34,8 @@ export class Recordatorio extends Entity {
   })
   idrecordatoriousuario: string;
 
-  @belongsTo(()=>Usuarios)
-  usuarios : string;
+  @belongsTo(()=>User)
+  users : string;
   // Define well-known properties here
 
   // Indexer property to allow additional data
