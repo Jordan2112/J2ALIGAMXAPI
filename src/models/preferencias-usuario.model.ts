@@ -1,5 +1,4 @@
-import {User} from '@loopback/authentication-jwt';
-import {belongsTo, Entity, model, property} from '@loopback/repository';
+import {Entity, model, property} from '@loopback/repository';
 
 @model({settings: {strict: false}})
 export class PreferenciasUsuario extends Entity {
@@ -26,8 +25,10 @@ export class PreferenciasUsuario extends Entity {
   })
   LogoEquipo?: string;
 
-  @belongsTo(()=>User)
-  idUser : string;
+  @property({
+    type:'string'
+  })
+  idUser?: string;
 
   // Define well-known properties here
 

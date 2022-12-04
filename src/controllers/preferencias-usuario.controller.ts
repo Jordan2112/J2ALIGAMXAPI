@@ -1,25 +1,21 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
 import {PreferenciasUsuario} from '../models';
 import {PreferenciasUsuarioRepository} from '../repositories';
 
+@authenticate ('jwt')
 export class PreferenciasUsuarioController {
   constructor(
     @repository(PreferenciasUsuarioRepository)
@@ -65,7 +61,7 @@ export class PreferenciasUsuarioController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(PreferenciasUsuario, {includeRelations: true}),
+          items: getModelSchemaRef(PreferenciasUsuario, {includeRelations: false}),
         },
       },
     },
@@ -75,6 +71,37 @@ export class PreferenciasUsuarioController {
   ): Promise<PreferenciasUsuario[]> {
     return this.preferenciasUsuarioRepository.find(filter);
   }
+
+
+  @get('/preferencias-usuarios/{idUser}', {
+    responses: {
+      '200': {
+        description: 'idUser exist',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  async findByIdUser(
+    @param.path.string('idUser') idUser: string,
+  ): Promise<PreferenciasUsuario | null> {
+    if (!idUser) {
+      throw new HttpErrors.BadRequest('email format not valid');
+    }
+    var preferencesUser = await this.preferenciasUsuarioRepository.findOne({where: {idUser: idUser}})
+      return preferencesUser;
+  }
+
 
   @patch('/preferencias-usuarios')
   @response(200, {
