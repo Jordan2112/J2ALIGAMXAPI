@@ -72,6 +72,7 @@ export class J2ALigamxApplication extends BootMixin(
     this.dataSource(J2AligamxDataSource, UserServiceBindings.DATASOURCE_NAME);
     this.dataSource(J2AligamxDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
     //Bind de Variables de Control
+
     this.bind('datasources.config.j2aligamx').to({
       "name": "j2aligamx",
       "connector": "mysql",
@@ -83,28 +84,28 @@ export class J2ALigamxApplication extends BootMixin(
       "database": database
     });
 
+    console.log({    "name": "j2aligamx",
+    "connector": "mariadb",
+    "url": "",
+    "host": db_host,
+    "port": db_port,
+    "user": db_user,
+    "password": db_pass,
+    "database": database})
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
 
     //for jwt acces token
-
     this.bind(TokenServiceBindings.TOKEN_SECRET).to("CLAVE SECRETA")
-
     //for refresh token
-
     this.bind(RefreshTokenServiceBindings.REFRESH_SECRET).to("CLAVE SECRETA")
 
-
-
     //for jwt acces token
-
-    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("172800000")
-
-
-    //216080
-    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("172800000")
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("172800")
+    // refresh token
+    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("1036800")
 
     this.bind(MailServiceBindings.MAILER_SERVICE).toClass(EmailService)
-      .to(new EmailService("j2aligamx@gmail.com", "sydfdaabdzhllkci"));
+      .to(new EmailService("j2aligamx@gmail.com", "mqgtnpmyysgyvivs"));
 
   }
 
