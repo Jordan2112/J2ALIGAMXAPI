@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -14,7 +15,7 @@ import {
 import {PreferenciasUsuario} from '../models';
 import {PreferenciasUsuarioRepository} from '../repositories';
 
-//@authenticate ('jwt')
+@authenticate ('jwt')
 export class PreferenciasUsuarioController {
   constructor(
     @repository(PreferenciasUsuarioRepository)

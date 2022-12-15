@@ -25,11 +25,11 @@ import {EmailService} from './services';
 
 //Configuracion Variables de Control (INCOMPLETA)
 require('dotenv').config()
-const db_host = process.env.DB_HOST || 'j2ligamx.cbr2yblgiwp6.us-east-2.rds.amazonaws.com';
-const db_port = process.env.DB_PORT || 3308;
-const db_user = process.env.DB_USER || 'admin';
-const db_pass = process.env.DB_PASSWORD || 'aacj2a-lmx';
-const database = process.env.DB_DATABASE || 'j2aligamx';
+const db_host = process.env.DB_HOST
+const db_port = process.env.DB_PORT
+const db_user = process.env.DB_USER
+const db_pass = process.env.DB_PASSWORD
+const database = process.env.DB_DATABASE
 
 export {ApplicationConfig};
 
@@ -84,14 +84,6 @@ export class J2ALigamxApplication extends BootMixin(
       "database": database
     });
 
-    console.log({    "name": "j2aligamx",
-    "connector": "mariadb",
-    "url": "",
-    "host": db_host,
-    "port": db_port,
-    "user": db_user,
-    "password": db_pass,
-    "database": database})
     this.bind(UserServiceBindings.USER_SERVICE).toClass(MyUserService);
 
     //for jwt acces token
